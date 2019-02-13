@@ -1,0 +1,93 @@
+body {
+	background-image: url("../images/background.png")
+}
+
+div {
+	background-color: lightgoldenrodyellow;
+	margin: 10px;
+	width: 25%;
+	border: solid 3px lightslategrey;
+	padding: 8px;
+	font-size: large;
+}
+
+h1{
+	font-size: 35px;
+	font-family: fantasy;
+	text-align: center;
+}
+
+h3,
+span {
+	font-weight: bold;
+	text-align: center;
+	font-size: 22px;
+}
+
+ol {
+	list-style: decimal inside;
+	
+}
+
+ul {
+	list-style-type: lower-roman;
+	list-style-position: inside;
+	text-indent: 50px;
+}
+
+/* class */
+div.header,
+div.crystals {
+	background-color: lavender;
+}
+
+div.header{
+	width: 40%;
+}
+div.instructions {
+	width: 45%;
+}
+
+.numberToMatch{
+	width: 12%;
+	height: 66px;
+	background-color: aquamarine
+}
+
+.winsAndLosses {
+	width: 99px;
+	height: 66px;
+	background-color: plum;
+}
+
+.userScore {
+	width: 12%;
+	height: 40px;
+	background-color: pink;
+}
+
+.crystals {
+	clear: both;
+}
+
+.crystalImage {
+	height: 65px;
+	margin: 15px;
+}
+
+/* id */
+#blue {
+	color: blue;
+}
+
+#green {
+	color: green;
+}
+
+#red {
+	color: red;
+}
+
+#orange {
+	color: orange;
+}
