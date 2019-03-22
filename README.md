@@ -1,6 +1,6 @@
 # Crystals Collector Game
 
-**Instructions:**
+## Instructions:
 
 
 1.  The player will have to guess the answer, just like in Word Guess. This time, though, the player will guess with numbers instead of letters. 
@@ -30,4 +30,14 @@
         ##### Option 1 Game design additional: 
         * The random number shown at the start of the game should be between 19 - 120.
         * Each crystal should have a random hidden value between 1 - 12.
+
+## Notes:
+
+**Further improvements:**
+
+   1. include more CSS design
+   
+   2. migrate the method to word guess
+   
+   
 
