@@ -1,4 +1,4 @@
-# Assignment 4: Crystals Collector Game
+# Crystals Collector Game
 
 Unit 4 Game for Crystals Collector Game (Opt 1)
 
