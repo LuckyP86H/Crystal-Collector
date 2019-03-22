@@ -38,5 +38,7 @@
    
    2. migrate the method to word guess
    
+____________________
+<sub> &copy; Paul Xu at Univerversity of Toronto School of Continuing Studies Coding Boot Camp in March 2019 </sub>
    
 
