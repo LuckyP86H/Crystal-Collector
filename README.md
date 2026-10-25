@@ -114,22 +114,42 @@ Privacy: a result stores a random per-browser UUID, the click and bust counts, a
 
 ## Deploy to Cloudflare
 
-The app deploys as a single Worker with static assets and a D1 database. Everything is declared in [`wrangler.jsonc`](wrangler.jsonc); no resource IDs are needed up front because Wrangler creates the D1 database on the first deploy.
+The app deploys as a single Worker with static assets and a D1 database, all declared in [`wrangler.jsonc`](wrangler.jsonc). Pick **one** way to deploy to production (2b or 2c), not both.
 
-**From your machine**
+### 1. Create the database once
 
 ```sh
-export CLOUDFLARE_API_TOKEN=...    # template "Edit Cloudflare Workers" plus D1 Edit
-export CLOUDFLARE_ACCOUNT_ID=...
-pnpm run cf:deploy                 # build, create the database on first run, upload
-pnpm run db:migrate:remote         # create the table
+pnpm exec wrangler login                        # or export CLOUDFLARE_API_TOKEN (needs "D1: Edit")
+pnpm exec wrangler d1 create crystal-collector  # prints a database_id
 ```
 
-Wrangler writes the new `database_id` back into `wrangler.jsonc`; commit it so later deploys reuse the same database. Never commit the token.
+Put the printed `database_id` in `d1_databases` in `wrangler.jsonc` and commit it. An explicit id works with every kind of API token. (Wrangler can also create the database during the first deploy, but only if the token is allowed to edit D1.)
 
-**From GitHub Actions**: add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as repository secrets. [`ci.yml`](.github/workflows/ci.yml) then deploys on every push to the default branch after the checks pass, and does nothing while the secrets are missing.
+### 2a. Deploy from your machine
 
-If the Worker needs a different name, change `name` in `wrangler.jsonc`.
+```sh
+pnpm run cf:deploy          # build and upload the Worker and assets
+pnpm run db:migrate:remote  # create the table (run again after adding a migration)
+```
+
+### 2b. Deploy from GitHub Actions
+
+Add `CLOUDFLARE_API_TOKEN` (template "Edit Cloudflare Workers" plus "D1: Edit") and `CLOUDFLARE_ACCOUNT_ID` as repository secrets. [`ci.yml`](.github/workflows/ci.yml) then deploys and migrates on every push to the default branch after the checks pass, and does nothing while the secrets are missing.
+
+### 2c. Deploy with Cloudflare Workers Builds
+
+If the Worker is connected to this repository in the Cloudflare dashboard, set **Settings → Build** to:
+
+| Setting | Value |
+| --- | --- |
+| Git branch | the default branch of this repository (`master` unless you rename it) |
+| Build command | `pnpm build` |
+| Deploy command | `pnpm exec wrangler deploy` |
+| Non-production branches | `pnpm exec wrangler versions upload` |
+
+If the build command is empty, as it would be for a plain static site, the deploy fails: the Worker needs the Vite build first. The API token that Workers Builds creates by itself can edit Workers, KV and R2 but **not D1**, which is why step 1 comes first. Apply migrations from your machine with `pnpm run db:migrate:remote`.
+
+The Worker's name is `crystal-collector`; if your Cloudflare project uses another name, change `name` in `wrangler.jsonc` (Workers Builds requires them to match).
 
 ## Version notes
 
