@@ -149,6 +149,33 @@ test.describe("daily puzzle", () => {
     await expect(page.getByRole("dialog", { name: /solved/ })).toBeVisible();
   });
 
+  test("moves on to the new puzzle when a tab is left open past midnight UTC", async ({ page }) => {
+    await page.clock.install({ time: new Date("2026-10-25T23:59:00Z") });
+    await page.goto("/");
+    await expect(page.getByTestId("target")).toHaveText(String(dailyPuzzle("2026-10-25").target));
+
+    await page.clock.setSystemTime(new Date("2026-10-26T00:00:30Z"));
+    await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+
+    await expect(page.getByText("Daily puzzle #2")).toBeVisible();
+    await expect(page.getByTestId("target")).toHaveText(String(dailyPuzzle("2026-10-26").target));
+  });
+
+  test("leaves a Classic round alone when the day changes underneath it", async ({ page }) => {
+    await page.clock.install({ time: new Date("2026-10-25T23:59:00Z") });
+    await page.goto("/?mode=classic&board=midnight");
+    await crystal(page, 0).click();
+    const score = await page.getByTestId("score").textContent();
+
+    await page.clock.setSystemTime(new Date("2026-10-26T00:00:30Z"));
+    await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+    await expect(page.getByTestId("score")).toHaveText(score ?? "");
+
+    // Going back to Daily is what refreshes the puzzle.
+    await page.getByRole("button", { name: "daily" }).click();
+    await expect(page.getByText("Daily puzzle #2")).toBeVisible();
+  });
+
   test("copies a shareable result", async ({ page, context }) => {
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     await page.addInitScript(() => {

@@ -9,7 +9,6 @@ import { loadFlag, loadPlayerId, saveFlag } from "./game/persistence";
 import { reduce } from "./game/state";
 import { boardUrl, newBoardId, useGame } from "./game/useGame";
 import { useLeaderboard } from "./game/useLeaderboard";
-import { pluralise } from "./lib/share";
 import { playBust, playClick, playWin, setMuted } from "./lib/sound";
 
 const RESULT_DELAY_MS = 700;
@@ -46,16 +45,18 @@ export function App() {
   useEffect(() => setMuted(soundOff), [soundOff]);
   useEffect(() => () => clearTimeout(resultTimer.current), []);
 
-  // A tab left open past 00:00 UTC would keep showing yesterday's puzzle, so reload it.
+  // A tab left open past 00:00 UTC keeps yesterday's puzzle. Refresh it once the player is looking
+  // at the Daily board; a Classic round in progress is left alone.
   useEffect(() => {
     const onVisible = () => {
-      if (document.visibilityState === "visible" && utcDay(new Date()) !== state.day) {
+      const stale = utcDay(new Date()) !== state.day;
+      if (document.visibilityState === "visible" && state.mode === "daily" && stale) {
         window.location.reload();
       }
     };
     document.addEventListener("visibilitychange", onVisible);
     return () => document.removeEventListener("visibilitychange", onVisible);
-  }, [state.day]);
+  }, [state.day, state.mode]);
 
   function pick(crystal: CrystalIndex) {
     const next = reduce(state, { type: "click", crystal });
@@ -111,6 +112,10 @@ export function App() {
   }, []);
 
   function switchMode(mode: "daily" | "classic") {
+    if (mode === "daily" && utcDay(new Date()) !== state.day) {
+      window.location.assign("/");
+      return;
+    }
     clearTimeout(resultTimer.current);
     setResultOpen(false);
     setLastPick(null);
@@ -127,10 +132,8 @@ export function App() {
   }
 
   function toggleSound() {
-    setSoundOff((off) => {
-      saveFlag("muted", !off);
-      return !off;
-    });
+    setSoundOff(!soundOff);
+    saveFlag("muted", !soundOff);
   }
 
   function closeHelp() {
@@ -288,8 +291,10 @@ export function App() {
   );
 }
 
+type TotalsItem = readonly [label: string, value: number];
+
 function Totals({ state }: { state: ReturnType<typeof useGame>[0] }) {
-  const items =
+  const items: readonly TotalsItem[] =
     state.mode === "daily"
       ? [
           ["Streak", state.dailyTotals.streak],
@@ -307,11 +312,11 @@ function Totals({ state }: { state: ReturnType<typeof useGame>[0] }) {
       <dl
         className={`grid gap-3 text-center ${items.length === 3 ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-4"}`}
       >
-        {items.map(([name, value]) => (
-          <div key={name} className="rounded-2xl border border-line bg-surface px-2 py-3">
-            <dt className="text-xs text-muted">{name}</dt>
+        {items.map(([label, value]) => (
+          <div key={label} className="rounded-2xl border border-line bg-surface px-2 py-3">
+            <dt className="text-xs text-muted">{label}</dt>
             <dd
-              data-testid={`total-${String(name).toLowerCase().replace(/\s+/g, "-")}`}
+              data-testid={`total-${label.toLowerCase().replace(/\s+/g, "-")}`}
               className="text-2xl font-semibold"
             >
               {value}
@@ -319,9 +324,6 @@ function Totals({ state }: { state: ReturnType<typeof useGame>[0] }) {
           </div>
         ))}
       </dl>
-      {state.mode === "daily" && state.dailyTotals.played > 0 ? (
-        <p className="sr-only">{pluralise(state.dailyTotals.played, "daily puzzle")} solved.</p>
-      ) : null}
     </section>
   );
 }
