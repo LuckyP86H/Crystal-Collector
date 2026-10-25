@@ -13,8 +13,7 @@
     {
       "binding": "DB",
       "database_name": "crystal-collector",
-      // After `wrangler d1 create crystal-collector`, add the printed id here:
-      // "database_id": "<id>",
+      "database_id": "62abe0d0-9856-442a-b99c-89dd853670a1",
       "migrations_dir": "migrations"
     }
   ]

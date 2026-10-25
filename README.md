@@ -123,7 +123,7 @@ pnpm exec wrangler login                        # or export CLOUDFLARE_API_TOKEN
 pnpm exec wrangler d1 create crystal-collector  # prints a database_id
 ```
 
-Put the printed `database_id` in `d1_databases` in `wrangler.jsonc` and commit it. An explicit id works with every kind of API token. (Wrangler can also create the database during the first deploy, but only if the token is allowed to edit D1.)
+The `database_id` is already committed in `wrangler.jsonc` (database created 2026-10-25); a fork needs its own id there. An explicit id works with every kind of API token. (Wrangler can also create the database during the first deploy, but only if the token is allowed to edit D1.)
 
 ### 2a. Deploy from your machine
 
