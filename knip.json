@@ -1,0 +1,13 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": ["e2e/**/*.spec.ts", "worker/test/*.ts", "scripts/*.mjs"],
+  "project": [
+    "src/**/*.{ts,tsx,css}",
+    "shared/**/*.ts",
+    "worker/**/*.ts",
+    "e2e/**/*.ts",
+    "*.config.ts"
+  ],
+  "ignoreExportsUsedInFile": true,
+  "ignoreDependencies": ["cloudflare"]
+}

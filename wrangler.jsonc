@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "crystal-collector",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-19",
+  "upload_source_maps": true,
+  "observability": { "enabled": true },
+  // Required by `wrangler preview`, which Workers Builds runs for non-production branches.
+  "previews": {},
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "crystal-collector",
+      "database_id": "62abe0d0-9856-442a-b99c-89dd853670a1",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

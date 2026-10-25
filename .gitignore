@@ -1,0 +1,26 @@
+# dependencies and build output
+node_modules/
+dist/
+.wrangler/
+
+# local secrets (commit the *.example files instead)
+.dev.vars*
+!.dev.vars.example
+.env
+.env.*
+!.env.example
+
+# test artefacts
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
