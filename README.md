@@ -145,7 +145,7 @@ If the Worker is connected to this repository in the Cloudflare dashboard, set *
 | Git branch | the default branch of this repository (`master` unless you rename it) |
 | Build command | `pnpm build` |
 | Deploy command | `pnpm exec wrangler deploy` |
-| Non-production branches | `pnpm exec wrangler versions upload` |
+| Non-production branches | `npx wrangler preview` (the dashboard default; needs the `previews` block already in `wrangler.jsonc`) |
 
 If the build command is empty, as it would be for a plain static site, the deploy fails: the Worker needs the Vite build first. The API token that Workers Builds creates by itself can edit Workers, KV and R2 but **not D1**, which is why step 1 comes first. Apply migrations from your machine with `pnpm run db:migrate:remote`.
 
