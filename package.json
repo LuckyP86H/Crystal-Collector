@@ -24,7 +24,8 @@
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
     "cf:deploy": "pnpm build && wrangler deploy",
-    "validate": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm e2e && pnpm knip"
+    "validate": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm e2e && pnpm knip",
+    "prepare": "node scripts/prepare.mjs"
   },
   "dependencies": {
     "@fontsource-variable/outfit": "^5.3.0",

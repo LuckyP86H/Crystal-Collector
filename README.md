@@ -149,6 +149,8 @@ If the Worker is connected to this repository in the Cloudflare dashboard, set *
 
 If the build command is empty, as it would be for a plain static site, the deploy fails: the Worker needs the Vite build first. The API token that Workers Builds creates by itself can edit Workers, KV and R2 but **not D1**, which is why step 1 comes first. Apply migrations from your machine with `pnpm run db:migrate:remote`.
 
+As a safety net, `pnpm install` runs `scripts/prepare.mjs`, which builds the app when Cloudflare's `WORKERS_CI=1` is set, so even an empty build command produces something deployable. It does nothing anywhere else.
+
 The Worker's name is `crystal-collector`; if your Cloudflare project uses another name, change `name` in `wrangler.jsonc` (Workers Builds requires them to match).
 
 ## Version notes
