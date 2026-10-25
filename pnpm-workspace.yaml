@@ -1,0 +1,9 @@
+allowBuilds:
+  esbuild: true
+  workerd: true
+
+# Cloudflare's local-dev packages pin vulnerable patch releases of these two
+# libraries (see `pnpm audit`). Force the patched versions; remove once upstream catches up.
+overrides:
+  undici: ^7.30.1
+  zod: ^4.6.7

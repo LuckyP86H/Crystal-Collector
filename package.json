@@ -1,0 +1,54 @@
+{
+  "name": "crystal-collector",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Crystal Collector: a hidden-values number puzzle with a daily challenge, built on Vite, React and Cloudflare Workers.",
+  "author": "Paul Xu",
+  "type": "module",
+  "packageManager": "pnpm@11.28.8",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "pnpm db:migrate:local && vite",
+    "build": "pnpm typecheck && vite build",
+    "preview": "pnpm db:migrate:local && vite preview",
+    "typecheck": "tsc -p tsconfig.app.json && tsc -p tsconfig.worker.json && tsc -p tsconfig.node.json",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "playwright test",
+    "knip": "knip",
+    "cf-typegen": "wrangler types",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local",
+    "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
+    "cf:deploy": "pnpm build && wrangler deploy",
+    "validate": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm e2e && pnpm knip"
+  },
+  "dependencies": {
+    "@fontsource-variable/outfit": "^5.3.0",
+    "hono": "^4.13.13",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@biomejs/biome": "^2.6.2",
+    "@cloudflare/vite-plugin": "^1.65.0",
+    "@cloudflare/vitest-plugin": "^1.4.7",
+    "@playwright/test": "^1.64.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "knip": "^6.42.1",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "~5.0.5",
+    "wrangler": "^4.152.0"
+  }
+}
