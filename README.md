@@ -100,6 +100,16 @@ e2e/           Playwright specs (gameplay, accessibility, API, dev-mode warnings
 public/        favicon, robots.txt, and _headers (CSP and caching for static assets)
 ```
 
+## Repository conventions
+
+The toolchain is pinned so a fresh clone behaves the same on every machine and in CI:
+
+- **One package manager: pnpm.** The exact version is the `packageManager` field in `package.json`; Corepack enforces it (`corepack enable`). A `preinstall` guard (`scripts/check-package-manager.mjs`) refuses installs from npm or yarn, which would otherwise create a competing lockfile; bun, which never runs a root `preinstall` script, is covered by the `.gitignore` rule below.
+- **One lockfile: `pnpm-lock.yaml`, committed.** `.gitignore` blocks other managers' lockfiles (`package-lock.json`, `yarn.lock`, `bun.lock*`), and CI installs with `pnpm install --frozen-lockfile`, so a dependency change fails CI until the updated lockfile is committed with it.
+- **Node version lives in `.nvmrc`** (currently 24), and CI reads it from there. `engines` in `package.json` states the supported floor (22.12), which is also why `@types/node` stays on 22.
+- **Config map:** `biome.json` owns lint and formatting; `vite.config.ts` the build; `vitest.config.ts` and `playwright.config.ts` the two test suites; `knip.json` unused-code checks; `wrangler.jsonc` the Worker, static assets and the D1 binding; `pnpm-workspace.yaml` holds pnpm-only settings (build approvals and dependency `overrides`). The `tsconfig.*.json` files split type-checking by runtime — app, Worker and tooling — under the root `tsconfig.json` references.
+- **Generated files:** `worker-configuration.d.ts` comes from `pnpm cf-typegen`; CI fails if it is stale. Dependencies are refreshed by Dependabot's weekly grouped PRs (see [Version notes](#version-notes)).
+
 ## API
 
 | Method and path | Purpose |

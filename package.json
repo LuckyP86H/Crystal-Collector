@@ -10,6 +10,7 @@
     "node": ">=22.12"
   },
   "scripts": {
+    "preinstall": "node scripts/check-package-manager.mjs",
     "dev": "pnpm db:migrate:local && vite",
     "build": "pnpm typecheck && vite build",
     "preview": "pnpm db:migrate:local && vite preview",
