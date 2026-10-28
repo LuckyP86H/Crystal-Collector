@@ -1,12 +1,16 @@
 import { env, exports } from "cloudflare:workers";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
+  applyMove,
   CRYSTAL_INDEXES,
   type CrystalIndex,
   dailyPuzzle,
   MAX_MOVES,
+  replayWin,
   routeOf,
   solve,
+  startRound,
+  trace,
   utcDay,
 } from "../shared/engine";
 
@@ -27,13 +31,41 @@ function optimalRoute(day: string): CrystalIndex[] {
   return routeOf(solution);
 }
 
-/** Clicks the biggest crystal until the score overshoots, forcing exactly one bust. */
+/**
+ * Builds a route that busts exactly once and never wins, on any board.
+ *
+ * The previous helper clicked the biggest crystal floor(target / biggest) + 1
+ * times and assumed the last click overshot. When the biggest value divided
+ * the target exactly, those clicks landed on the target and won instead, so
+ * every later move was rejected as a move after the end. This version plays
+ * the round with the engine itself: prefer the biggest crystal, but never
+ * take a click that would win; the first click that overshoots is the single
+ * bust, and the route ends there, mid-round.
+ */
 function bustRoute(day: string): CrystalIndex[] {
-  const { values, target } = dailyPuzzle(day);
-  const biggest = CRYSTAL_INDEXES.reduce((best, crystal) =>
-    values[crystal] > values[best] ? crystal : best,
-  );
-  return Array.from({ length: Math.floor(target / values[biggest]) + 1 }, () => biggest);
+  const puzzle = dailyPuzzle(day);
+  let round = startRound(puzzle, "reset");
+  const route: CrystalIndex[] = [];
+
+  while (round.busts === 0) {
+    const remaining = puzzle.target - round.score;
+    // Daily boards always deal four distinct values, so at most one crystal
+    // can be worth exactly the remaining gap; any other click keeps playing
+    // or busts, but can never win the round by accident.
+    const move = [...CRYSTAL_INDEXES]
+      .sort((left, right) => puzzle.values[right] - puzzle.values[left])
+      .find((crystal) => puzzle.values[crystal] !== remaining);
+    if (move === undefined) {
+      throw new Error(`board for ${day} should always allow a non-winning click`);
+    }
+    route.push(move);
+    round = applyMove(round, move);
+  }
+
+  if (round.status !== "playing" || round.busts !== 1) {
+    throw new Error(`bust route for ${day} should end mid-round with exactly one bust`);
+  }
+  return route;
 }
 
 function post(day: string, body: unknown, init: RequestInit = {}) {
@@ -225,6 +257,32 @@ describe("POST /api/daily/:day/results", () => {
     const response = await exports.default.fetch(`${ORIGIN}/api/daily/${today}/results`);
     expect(response.status).toBe(405);
     expect(response.headers.get("allow")).toBe("POST");
+  });
+});
+
+describe("bustRoute (regression: biggest crystal dividing the target)", () => {
+  it("busts exactly once and stays winnable for every day in 2026", () => {
+    // 2026-10-26 (target 27, biggest crystal 9) and 2026-10-29 (target 40,
+    // biggest 10) are the days that exposed the old helper: 27 = 3 x 9 and
+    // 40 = 4 x 10, so its "bust" clicks won the round instead of busting.
+    // Sweep the whole year so the next divisible board is caught anywhere.
+    for (let dayOffset = 0; dayOffset < 365; dayOffset++) {
+      const day = utcDay(new Date(Date.UTC(2026, 0, 1 + dayOffset)));
+      const puzzle = dailyPuzzle(day);
+      const route = bustRoute(day);
+      const steps = trace(puzzle, route, "reset");
+      expect(
+        steps.filter((step) => step.bust),
+        day,
+      ).toHaveLength(1);
+      expect(steps.at(-1)?.bust, day).toBe(true);
+
+      const replay = replayWin(puzzle, [...route, ...optimalRoute(day)], "reset");
+      if (!replay.ok) {
+        throw new Error(`${day}: bust route should leave a winnable board, got ${replay.reason}`);
+      }
+      expect(replay.round.busts, day).toBe(1);
+    }
   });
 });
 
